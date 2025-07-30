@@ -24,4 +24,5 @@ public class UserRestController {
     public ResponseEntity<CreateUserResponse> saveOwner(@RequestBody @Valid CreateUserRequest createUserRequest) {
         return new ResponseEntity<>(userHandler.saveOwner(createUserRequest), HttpStatus.CREATED);
     }
+
 }
