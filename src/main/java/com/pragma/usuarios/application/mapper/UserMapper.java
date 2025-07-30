@@ -1,5 +1,6 @@
 package com.pragma.usuarios.application.mapper;
 
+import com.pragma.usuarios.application.dto.AuthRequest;
 import com.pragma.usuarios.application.dto.CreateUserRequest;
 import com.pragma.usuarios.application.dto.CreateUserResponse;
 import com.pragma.usuarios.domain.model.User;
@@ -14,4 +15,6 @@ public interface UserMapper {
     User toUser(CreateUserRequest request);
 
     CreateUserResponse toUserResponse(User user);
+
+    User toUserLogin(AuthRequest authRequest);
 }

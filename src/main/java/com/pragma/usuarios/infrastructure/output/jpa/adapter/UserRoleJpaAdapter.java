@@ -10,6 +10,8 @@ import com.pragma.usuarios.infrastructure.output.jpa.mapper.IUserEntityMapper;
 import com.pragma.usuarios.infrastructure.output.jpa.repository.IUserRoleRepository;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 public class UserRoleJpaAdapter implements IUserRolePersistencePort {
 
@@ -28,4 +30,13 @@ public class UserRoleJpaAdapter implements IUserRolePersistencePort {
         relation.setRole(roleEntityMapper.toRoleEntity(role));
         userRoleRepository.save(relation);
     }
+
+    @Override
+    public List<String> findByUser(User user) {
+        return userRoleRepository.findByUser(userEntityMapper.toUserEntity(user))
+                .stream()
+                .map(ur->ur.getRole().getName())
+                .toList();
+    }
+
 }

@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,7 @@ public class UserRestController {
 
     private final IUserHandler userHandler;
 
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
     @PostMapping("/owner")
     public ResponseEntity<CreateUserResponse> saveOwner(@RequestBody @Valid CreateUserRequest createUserRequest) {
         return new ResponseEntity<>(userHandler.saveOwner(createUserRequest), HttpStatus.CREATED);
