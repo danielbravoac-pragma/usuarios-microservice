@@ -43,4 +43,15 @@ class UserRoleUseCaseTest {
         assertEquals(1L, userCaptor.getValue().getId());
         assertEquals(UserRole.OWNER, roleCaptor.getValue().getName());
     }
+
+    @Test
+    void findByUser_shouldReturnListStringOfRoles(){
+        User user = new User();
+        user.setId(1L);
+
+        userRoleUseCase.findByUser(user);
+
+        verify(userRolePersistencePort,times(1)).findByUser(user);
+
+    }
 }
