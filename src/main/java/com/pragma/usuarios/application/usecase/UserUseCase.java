@@ -83,4 +83,9 @@ public class UserUseCase implements IUserServicePort {
                 .orElseThrow(() -> new DataNotExistsException("User not registered."));
     }
 
+    @Override
+    public User findById(Long id) {
+        return userPersistencePort.findById(id);
+    }
+
 }

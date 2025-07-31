@@ -8,4 +8,6 @@ public interface IUserServicePort {
     User createOwner(User user, User currentUser);
 
     User findByEmail(String email);
+
+    User findById(Long id);
 }
