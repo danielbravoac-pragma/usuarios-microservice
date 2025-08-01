@@ -1,10 +1,10 @@
 package com.pragma.usuarios.infrastructure.configuration;
 
-import com.pragma.usuarios.application.usecase.*;
 import com.pragma.usuarios.domain.api.*;
 import com.pragma.usuarios.domain.spi.IRolePersistencePort;
 import com.pragma.usuarios.domain.spi.IUserPersistencePort;
 import com.pragma.usuarios.domain.spi.IUserRolePersistencePort;
+import com.pragma.usuarios.domain.usecase.*;
 import com.pragma.usuarios.infrastructure.output.jpa.adapter.RoleJpaAdapter;
 import com.pragma.usuarios.infrastructure.output.jpa.adapter.UserJpaAdapter;
 import com.pragma.usuarios.infrastructure.output.jpa.adapter.UserRoleJpaAdapter;
@@ -32,8 +32,13 @@ public class BeanConfiguration {
     private final JwtService jwtService;
 
     @Bean
+    public IPasswordEncoderServicePort passwordEncoderServicePort() {
+        return new PasswordUseCase(passwordEncoder());
+    }
+
+    @Bean
     public IAuthServicePort authServicePort() {
-        return new AuthUseCase(jwtService, userServicePort(), userRoleServicePort(), passwordEncoder());
+        return new AuthUseCase(jwtService, userServicePort(), userRoleServicePort(), passwordEncoderServicePort());
     }
 
     @Bean
@@ -73,6 +78,6 @@ public class BeanConfiguration {
 
     @Bean
     public IUserServicePort userServicePort() {
-        return new UserUseCase(userPersistencePort(), passwordEncoder(), permissionServicePort(), roleServicePort(), userRoleServicePort());
+        return new UserUseCase(userPersistencePort(), passwordEncoderServicePort(), permissionServicePort(), roleServicePort(), userRoleServicePort());
     }
 }

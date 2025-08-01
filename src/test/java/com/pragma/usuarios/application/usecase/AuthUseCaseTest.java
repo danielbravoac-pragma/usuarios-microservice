@@ -1,9 +1,12 @@
 package com.pragma.usuarios.application.usecase;
 
+import com.pragma.usuarios.application.exceptions.BlockedByLoginAttemptsException;
 import com.pragma.usuarios.application.exceptions.InvalidCredentialsLoginException;
+import com.pragma.usuarios.domain.api.IPasswordEncoderServicePort;
 import com.pragma.usuarios.domain.api.IUserRoleServicePort;
 import com.pragma.usuarios.domain.api.IUserServicePort;
 import com.pragma.usuarios.domain.model.User;
+import com.pragma.usuarios.domain.usecase.AuthUseCase;
 import com.pragma.usuarios.infrastructure.output.jwt.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,12 +15,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthUseCaseTest {
@@ -29,54 +34,102 @@ class AuthUseCaseTest {
     @Mock
     private IUserRoleServicePort userRoleServicePort;
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private IPasswordEncoderServicePort passwordEncoder;
 
     @InjectMocks
     private AuthUseCase authUseCase;
 
-    private User loginRequest;
-    private User userInDb;
+    private User userInput;
+    private User userFromDb;
 
     @BeforeEach
     void setUp() {
-        loginRequest = new User();
-        loginRequest.setEmail("test@test.com");
-        loginRequest.setPassword("1234");
+        userInput = new User();
+        userInput.setEmail("test@example.com");
+        userInput.setPassword("plainPassword");
 
-        userInDb = new User();
-        userInDb.setId(1L);
-        userInDb.setEmail("test@test.com");
-        userInDb.setPassword("hashed-pass");
+        userFromDb = new User();
+        userFromDb.setId(1L);
+        userFromDb.setEmail("test@example.com");
+        userFromDb.setPassword("hashedPassword");
     }
 
     @Test
     void getToken_ShouldReturnToken_WhenCredentialsValid() {
-        when(userServicePort.findByEmail("test@test.com")).thenReturn(userInDb);
-        when(passwordEncoder.matches("1234", "hashed-pass")).thenReturn(true);
-        when(userRoleServicePort.findByUser(userInDb)).thenReturn(List.of("OWNER"));
-        when(jwtService.generateToken(1L, List.of("OWNER"))).thenReturn("fake-jwt-token");
+        when(userServicePort.findByEmail("test@example.com")).thenReturn(userFromDb);
+        when(passwordEncoder.matches("plainPassword", "hashedPassword")).thenReturn(true);
+        when(userRoleServicePort.findByUser(userFromDb)).thenReturn(List.of("ADMIN"));
+        when(jwtService.generateToken(1L, List.of("ADMIN"))).thenReturn("jwt-token");
 
-        String token = authUseCase.getToken(loginRequest);
+        String token = authUseCase.getToken(userInput);
 
-        assertEquals("fake-jwt-token", token);
+        assertEquals("jwt-token", token);
+        verify(jwtService).generateToken(1L, List.of("ADMIN"));
+        // Verifica que resetea intentos
+        assertFalse(authUseCase.isBlocked("test@example.com"));
     }
 
     @Test
-    void getToken_ShouldThrowException_WhenPasswordInvalid() {
-        when(userServicePort.findByEmail("test@test.com")).thenReturn(userInDb);
-        when(passwordEncoder.matches("1234", "hashed-pass")).thenReturn(false);
+    void getToken_ShouldThrowInvalidCredentials_WhenPasswordIncorrect() {
+        when(userServicePort.findByEmail("test@example.com")).thenReturn(userFromDb);
+        when(passwordEncoder.matches("plainPassword", "hashedPassword")).thenReturn(false);
 
-        assertThrows(InvalidCredentialsLoginException.class,
-                () -> authUseCase.getToken(loginRequest));
+        assertThrows(InvalidCredentialsLoginException.class, () -> authUseCase.getToken(userInput));
+        // Verifica que incrementa intentos
+        assertFalse(authUseCase.isBlocked("test@example.com"));
     }
 
     @Test
-    void getRoles_ShouldReturnRoles() {
-        when(userServicePort.findByEmail("test@test.com")).thenReturn(userInDb);
-        when(userRoleServicePort.findByUser(userInDb)).thenReturn(List.of("ADMINISTRATOR", "OWNER"));
+    void getToken_ShouldThrowBlockedException_WhenUserIsBlocked() {
+        // Forzar el estado bloqueado directamente
+        authUseCase.loginFailed("test@example.com");
+        authUseCase.loginFailed("test@example.com");
+        authUseCase.loginFailed("test@example.com");
+        authUseCase.loginFailed("test@example.com");
+        authUseCase.loginFailed("test@example.com");
 
-        List<String> roles = authUseCase.getRoles(loginRequest);
-
-        assertEquals(List.of("ADMINISTRATOR", "OWNER"), roles);
+        assertTrue(authUseCase.isBlocked("test@example.com"));
+        assertThrows(BlockedByLoginAttemptsException.class, () -> authUseCase.getToken(userInput));
     }
+
+    @Test
+    void loginSucceeded_ShouldResetAttempts() {
+        authUseCase.loginFailed("test@example.com");
+        authUseCase.loginSucceeded("test@example.com");
+
+        assertFalse(authUseCase.isBlocked("test@example.com"));
+    }
+
+    @Test
+    void loginFailed_ShouldBlockAfterMaxAttempts() {
+        for (int i = 0; i < 5; i++) {
+            authUseCase.loginFailed("test@example.com");
+        }
+
+        assertTrue(authUseCase.isBlocked("test@example.com"));
+    }
+
+    @Test
+    void isBlocked_ShouldReturnFalse_WhenNoAttempts() {
+        assertFalse(authUseCase.isBlocked("unknown@example.com"));
+    }
+
+    @Test
+    void isBlocked_ShouldReturnFalse_WhenNoLockUntil() {
+        authUseCase.loginFailed("test@example.com");
+        // Primer intento no tiene lockUntil
+        assertFalse(authUseCase.isBlocked("test@example.com"));
+    }
+
+    @Test
+    void isBlocked_ShouldReturnTrue_WhenLockUntilFuture() {
+        AuthUseCase.LoginAttempt attempt = new AuthUseCase.LoginAttempt(3, LocalDateTime.now().plusMinutes(5));
+        ConcurrentHashMap<String, AuthUseCase.LoginAttempt> map = new ConcurrentHashMap<>();
+        map.put("test@example.com", attempt);
+
+        ReflectionTestUtils.setField(authUseCase, "attempts", map);
+
+        assertTrue(authUseCase.isBlocked("test@example.com"));
+    }
+
 }

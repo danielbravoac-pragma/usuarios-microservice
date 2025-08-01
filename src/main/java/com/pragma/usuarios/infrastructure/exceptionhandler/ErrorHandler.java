@@ -1,9 +1,6 @@
 package com.pragma.usuarios.infrastructure.exceptionhandler;
 
-import com.pragma.usuarios.application.exceptions.DataNotExistsException;
-import com.pragma.usuarios.application.exceptions.InvalidAgeException;
-import com.pragma.usuarios.application.exceptions.InvalidCredentialsLoginException;
-import com.pragma.usuarios.application.exceptions.UserAlreadyRegisteredException;
+import com.pragma.usuarios.application.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,7 +15,6 @@ import org.springframework.web.context.request.WebRequest;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
-@ControllerAdvice
 @Slf4j
 public class ErrorHandler {
 
@@ -26,6 +22,12 @@ public class ErrorHandler {
     public ResponseEntity<GenericResponse> handleDefaultException(Exception ex, WebRequest request) {
         log.error(ex.getMessage(), ex);
         return new ResponseEntity<>(new GenericResponse<>(new Info(HttpStatus.INTERNAL_SERVER_ERROR.value(), "SOMETHING HAPPEN - CONTACT THE IT TEAM")), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(BlockedByLoginAttemptsException.class)
+    public ResponseEntity<GenericResponse> handleBlockedByLoginAttemptsException(BlockedByLoginAttemptsException ex, WebRequest request) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(new GenericResponse<>(new Info(HttpStatus.UNAUTHORIZED.value(), "USER BLOCKED BY RETRYING FAILED LOGIN -- TRY AGAIN LATER")), HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

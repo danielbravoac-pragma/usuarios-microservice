@@ -8,4 +8,8 @@ public interface IAuthServicePort {
     String getToken(User user);
 
     List<String> getRoles(User user);
+
+    void loginFailed(String email);
+
+    void loginSucceeded(String email);
 }

@@ -1,4 +1,4 @@
-package com.pragma.usuarios.application.usecase;
+package com.pragma.usuarios.domain.usecase;
 
 import com.pragma.usuarios.domain.api.IPermissionServicePort;
 import com.pragma.usuarios.domain.model.User;

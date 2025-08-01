@@ -4,6 +4,7 @@ import com.pragma.usuarios.application.exceptions.AccessDeniedException;
 import com.pragma.usuarios.application.exceptions.DataNotExistsException;
 import com.pragma.usuarios.application.exceptions.InvalidAgeException;
 import com.pragma.usuarios.application.exceptions.UserAlreadyRegisteredException;
+import com.pragma.usuarios.domain.api.IPasswordEncoderServicePort;
 import com.pragma.usuarios.domain.api.IPermissionServicePort;
 import com.pragma.usuarios.domain.api.IRoleServicePort;
 import com.pragma.usuarios.domain.api.IUserRoleServicePort;
@@ -11,6 +12,7 @@ import com.pragma.usuarios.domain.model.Role;
 import com.pragma.usuarios.domain.model.User;
 import com.pragma.usuarios.domain.model.UserRole;
 import com.pragma.usuarios.domain.spi.IUserPersistencePort;
+import com.pragma.usuarios.domain.usecase.UserUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +39,7 @@ class UserUseCaseTest {
     @Mock
     private IUserPersistencePort userPersistencePort;
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private IPasswordEncoderServicePort passwordEncoder;
     @Mock
     private IPermissionServicePort permissionServicePort;
     @Mock

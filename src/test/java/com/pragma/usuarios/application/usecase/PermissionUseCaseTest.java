@@ -1,6 +1,7 @@
 package com.pragma.usuarios.application.usecase;
 
 import com.pragma.usuarios.domain.model.User;
+import com.pragma.usuarios.domain.usecase.PermissionUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;

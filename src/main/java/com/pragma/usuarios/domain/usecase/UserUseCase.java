@@ -1,13 +1,10 @@
-package com.pragma.usuarios.application.usecase;
+package com.pragma.usuarios.domain.usecase;
 
 import com.pragma.usuarios.application.exceptions.AccessDeniedException;
 import com.pragma.usuarios.application.exceptions.DataNotExistsException;
 import com.pragma.usuarios.application.exceptions.InvalidAgeException;
 import com.pragma.usuarios.application.exceptions.UserAlreadyRegisteredException;
-import com.pragma.usuarios.domain.api.IPermissionServicePort;
-import com.pragma.usuarios.domain.api.IRoleServicePort;
-import com.pragma.usuarios.domain.api.IUserRoleServicePort;
-import com.pragma.usuarios.domain.api.IUserServicePort;
+import com.pragma.usuarios.domain.api.*;
 import com.pragma.usuarios.domain.model.Role;
 import com.pragma.usuarios.domain.model.User;
 import com.pragma.usuarios.domain.model.UserRole;
@@ -17,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -29,7 +25,7 @@ public class UserUseCase implements IUserServicePort {
 
     private final IUserPersistencePort userPersistencePort;
 
-    private final PasswordEncoder passwordEncoder;
+    private final IPasswordEncoderServicePort passwordEncoderServicePort;
 
     private final IPermissionServicePort permissionServicePort;
 
@@ -49,7 +45,7 @@ public class UserUseCase implements IUserServicePort {
                 }
         );
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoderServicePort.encode(user.getPassword()));
 
         User savedUser = userPersistencePort.saveUser(user);
 

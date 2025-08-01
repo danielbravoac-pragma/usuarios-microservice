@@ -4,6 +4,7 @@ import com.pragma.usuarios.domain.model.Role;
 import com.pragma.usuarios.domain.model.User;
 import com.pragma.usuarios.domain.model.UserRole;
 import com.pragma.usuarios.domain.spi.IUserRolePersistencePort;
+import com.pragma.usuarios.domain.usecase.UserRoleUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
