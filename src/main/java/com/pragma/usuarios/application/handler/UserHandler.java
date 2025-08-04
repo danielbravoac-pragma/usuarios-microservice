@@ -26,15 +26,22 @@ public class UserHandler implements IUserHandler {
     public CreateUserResponse saveOwner(CreateUserRequest createUserRequest) {
         return userMapper.toUserResponse(
                 userServicePort.createOwner(
-                        userMapper.toUser(createUserRequest),
-                        new User()
+                        userMapper.toUser(createUserRequest)
                 ));
     }
 
     @Override
     public UserByIdResponse findById(Long id) {
-        User user=userServicePort.findById(id);
-        return new UserByIdResponse(user.getId(),user.getName(),authServicePort.getRoles(user));
+        User user = userServicePort.findById(id);
+        return new UserByIdResponse(user.getId(), user.getName(), authServicePort.getRoles(user));
+    }
+
+    @Override
+    public CreateUserResponse saveEmployee(CreateUserRequest createUserRequest) {
+        return userMapper.toUserResponse(
+                userServicePort.createEmployee(
+                        userMapper.toUser(createUserRequest))
+        );
     }
 
 

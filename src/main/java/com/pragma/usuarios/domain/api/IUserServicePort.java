@@ -5,7 +5,9 @@ import com.pragma.usuarios.domain.model.User;
 public interface IUserServicePort {
     User createUser(User user);
 
-    User createOwner(User user, User currentUser);
+    User createOwner(User user);
+
+    User createEmployee(User user);
 
     User findByEmail(String email);
 

@@ -1,6 +1,5 @@
 package com.pragma.usuarios.domain.usecase;
 
-import com.pragma.usuarios.application.exceptions.AccessDeniedException;
 import com.pragma.usuarios.application.exceptions.DataNotExistsException;
 import com.pragma.usuarios.application.exceptions.InvalidAgeException;
 import com.pragma.usuarios.application.exceptions.UserAlreadyRegisteredException;
@@ -11,13 +10,9 @@ import com.pragma.usuarios.domain.model.UserRole;
 import com.pragma.usuarios.domain.spi.IUserPersistencePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,18 +53,16 @@ public class UserUseCase implements IUserServicePort {
     }
 
     @Override
-    public User createOwner(User user, User currentUser) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        List<String> roles = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
-
-        if (!roles.contains("ROLE_" + UserRole.ADMINISTRATOR.toString())) {
-            throw new AccessDeniedException("Solo el ADMINISTRADOR puede crear un Propietario");
-        }
-
-        permissionServicePort.canCreateOwner(currentUser);
+    public User createOwner(User user) {
+        permissionServicePort.canCreateOwner();
         user.getRoles().add(new Role(UserRole.OWNER));
+        return createUser(user);
+    }
+
+    @Override
+    public User createEmployee(User user) {
+        permissionServicePort.canCreateEmployee();
+        user.getRoles().add(new Role(UserRole.EMPLOYEE));
         return createUser(user);
     }
 

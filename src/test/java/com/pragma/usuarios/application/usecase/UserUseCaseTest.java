@@ -108,10 +108,10 @@ class UserUseCaseTest {
         when(userPersistencePort.saveUser(any(User.class))).thenReturn(user);
         when(roleServicePort.findByName(any())).thenReturn(new Role(UserRole.OWNER));
 
-        User result = userUseCase.createOwner(user, new User());
+        User result = userUseCase.createOwner(user);
 
         assertTrue(result.getRoles().stream().anyMatch(r -> r.getName() == UserRole.OWNER));
-        verify(permissionServicePort).canCreateOwner(any());
+        verify(permissionServicePort).canCreateOwner();
     }
 
     @Test
@@ -122,8 +122,8 @@ class UserUseCaseTest {
                         List.of(() -> "ROLE_CUSTOMER"))
         );
 
-        assertThrows(AccessDeniedException.class, () -> userUseCase.createOwner(user, new User()));
-        verify(permissionServicePort, never()).canCreateOwner(any());
+        assertThrows(AccessDeniedException.class, () -> userUseCase.createOwner(user));
+        verify(permissionServicePort, never()).canCreateOwner();
     }
 
     @Test

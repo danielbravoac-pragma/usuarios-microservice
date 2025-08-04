@@ -17,7 +17,7 @@ class PermissionUseCaseTest {
         User user = new User();
         user.setId(1L);
 
-        boolean result = permissionUseCase.canCreateOwner(user);
+        boolean result = permissionUseCase.canCreateOwner();
 
         assertTrue(result, "El método canCreateOwner debería devolver true siempre");
     }

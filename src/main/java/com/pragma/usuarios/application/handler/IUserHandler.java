@@ -8,4 +8,6 @@ public interface IUserHandler {
     CreateUserResponse saveOwner(CreateUserRequest createUserRequest);
 
     UserByIdResponse findById(Long id);
+
+    CreateUserResponse saveEmployee(CreateUserRequest createUserRequest);
 }
