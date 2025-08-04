@@ -44,5 +44,14 @@ public class UserHandler implements IUserHandler {
         );
     }
 
+    @Override
+    public CreateUserResponse saveCustomer(CreateUserRequest createUserRequest) {
+        return userMapper.toUserResponse(
+                userServicePort.createClient(
+                        userMapper.toUser(createUserRequest)
+                )
+        );
+    }
+
 
 }

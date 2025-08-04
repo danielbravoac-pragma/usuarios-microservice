@@ -11,5 +11,7 @@ public interface IUserServicePort {
 
     User findByEmail(String email);
 
+    User createClient(User user);
+
     User findById(Long id);
 }
