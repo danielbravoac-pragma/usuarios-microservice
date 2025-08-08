@@ -33,7 +33,7 @@ public class UserHandler implements IUserHandler {
     @Override
     public UserByIdResponse findById(Long id) {
         User user = userServicePort.findById(id);
-        return new UserByIdResponse(user.getId(), user.getName(), authServicePort.getRoles(user));
+        return new UserByIdResponse(user.getId(), user.getName(), authServicePort.getRoles(user), user.getRestaurantId(),user.getPhoneNumber());
     }
 
     @Override

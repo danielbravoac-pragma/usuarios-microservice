@@ -13,4 +13,6 @@ public class UserByIdResponse {
     private Long id;
     private String name;
     private List<String> roles;
+    private Long restaurantId;
+    private String phoneNumber;
 }

@@ -33,4 +33,6 @@ public class CreateUserRequest {
 
     @NotEmpty
     private String password;
+
+    private Long restaurantId;
 }
