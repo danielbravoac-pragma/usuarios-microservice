@@ -58,7 +58,7 @@ class UserHandlerTest {
         expectedResponse.setName("Daniel");
 
         when(userMapper.toUser(createUserRequest)).thenReturn(user);
-        when(userServicePort.createOwner(any(User.class), any(User.class))).thenReturn(user);
+        when(userServicePort.createOwner(any(User.class))).thenReturn(user);
         when(userMapper.toUserResponse(user)).thenReturn(expectedResponse);
 
         // Act

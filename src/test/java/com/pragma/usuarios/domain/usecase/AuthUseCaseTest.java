@@ -1,4 +1,4 @@
-package com.pragma.usuarios.application.usecase;
+package com.pragma.usuarios.domain.usecase;
 
 import com.pragma.usuarios.application.exceptions.BlockedByLoginAttemptsException;
 import com.pragma.usuarios.application.exceptions.InvalidCredentialsLoginException;
