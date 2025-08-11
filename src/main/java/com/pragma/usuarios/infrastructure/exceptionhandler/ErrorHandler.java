@@ -1,6 +1,7 @@
 package com.pragma.usuarios.infrastructure.exceptionhandler;
 
 import com.pragma.usuarios.application.exceptions.*;
+import com.pragma.usuarios.infrastructure.exception.DataNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,7 +44,13 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(DataNotExistsException.class)
-    public ResponseEntity<GenericResponse> handleDataNotFoundException(DataNotExistsException ex, WebRequest request) {
+    public ResponseEntity<GenericResponse> handleDataNotExistsException(DataNotExistsException ex, WebRequest request) {
+        log.error(ex.getMessage(), ex);
+        return new ResponseEntity<>(new GenericResponse<>(new Info(HttpStatus.NOT_FOUND.value(), "DATA NOT FOUND")), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DataNotFoundException.class)
+    public ResponseEntity<GenericResponse> handleDataNotFoundException(DataNotFoundException ex, WebRequest request) {
         log.error(ex.getMessage(), ex);
         return new ResponseEntity<>(new GenericResponse<>(new Info(HttpStatus.NOT_FOUND.value(), "DATA NOT FOUND")), HttpStatus.NOT_FOUND);
     }
