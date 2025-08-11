@@ -1,5 +1,6 @@
 package com.pragma.usuarios.infrastructure.output.jpa.adapter;
 
+import com.pragma.usuarios.application.exceptions.DataNotExistsException;
 import com.pragma.usuarios.domain.model.User;
 import com.pragma.usuarios.domain.spi.IUserPersistencePort;
 import com.pragma.usuarios.infrastructure.output.jpa.mapper.IUserEntityMapper;
@@ -24,5 +25,12 @@ public class UserJpaAdapter implements IUserPersistencePort {
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .map(userEntityMapper::toUser);
+    }
+
+    @Override
+    public User findById(Long id) {
+        return userEntityMapper.toUser(
+                userRepository.findById(id).orElseThrow(() -> new DataNotExistsException("User not found."))
+        );
     }
 }

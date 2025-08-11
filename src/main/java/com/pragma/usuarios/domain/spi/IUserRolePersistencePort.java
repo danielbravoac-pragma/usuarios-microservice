@@ -3,6 +3,10 @@ package com.pragma.usuarios.domain.spi;
 import com.pragma.usuarios.domain.model.Role;
 import com.pragma.usuarios.domain.model.User;
 
+import java.util.List;
+
 public interface IUserRolePersistencePort {
     void saveUserRole(User user, Role role);
+
+    List<String> findByUser(User user);
 }

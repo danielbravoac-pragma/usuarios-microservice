@@ -1,19 +1,15 @@
-package com.pragma.usuarios.application.usecase;
+package com.pragma.usuarios.domain.usecase;
 
+import com.pragma.usuarios.application.exceptions.DataNotExistsException;
 import com.pragma.usuarios.application.exceptions.InvalidAgeException;
 import com.pragma.usuarios.application.exceptions.UserAlreadyRegisteredException;
-import com.pragma.usuarios.domain.api.IPermissionServicePort;
-import com.pragma.usuarios.domain.api.IRoleServicePort;
-import com.pragma.usuarios.domain.api.IUserRoleServicePort;
-import com.pragma.usuarios.domain.api.IUserServicePort;
+import com.pragma.usuarios.domain.api.*;
 import com.pragma.usuarios.domain.model.Role;
 import com.pragma.usuarios.domain.model.User;
 import com.pragma.usuarios.domain.model.UserRole;
-import com.pragma.usuarios.domain.spi.IRolePersistencePort;
 import com.pragma.usuarios.domain.spi.IUserPersistencePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -24,7 +20,7 @@ public class UserUseCase implements IUserServicePort {
 
     private final IUserPersistencePort userPersistencePort;
 
-    private final PasswordEncoder passwordEncoder;
+    private final IPasswordEncoderServicePort passwordEncoderServicePort;
 
     private final IPermissionServicePort permissionServicePort;
 
@@ -44,7 +40,7 @@ public class UserUseCase implements IUserServicePort {
                 }
         );
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoderServicePort.encode(user.getPassword()));
 
         User savedUser = userPersistencePort.saveUser(user);
 
@@ -57,10 +53,34 @@ public class UserUseCase implements IUserServicePort {
     }
 
     @Override
-    public User createOwner(User user, User currentUser) {
-        permissionServicePort.canCreateOwner(currentUser);
+    public User createOwner(User user) {
+        permissionServicePort.canCreateOwner();
         user.getRoles().add(new Role(UserRole.OWNER));
         return createUser(user);
+    }
+
+    @Override
+    public User createEmployee(User user) {
+        permissionServicePort.canCreateEmployee();
+        user.getRoles().add(new Role(UserRole.EMPLOYEE));
+        return createUser(user);
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        return userPersistencePort.findByEmail(email)
+                .orElseThrow(() -> new DataNotExistsException("User not registered."));
+    }
+
+    @Override
+    public User createClient(User user) {
+        user.getRoles().add(new Role(UserRole.CUSTOMER));
+        return createUser(user);
+    }
+
+    @Override
+    public User findById(Long id) {
+        return userPersistencePort.findById(id);
     }
 
 }

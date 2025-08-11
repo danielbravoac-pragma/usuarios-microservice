@@ -9,8 +9,10 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthResponse {
-    private String token;
-
+public class UserByIdResponse {
+    private Long id;
+    private String name;
     private List<String> roles;
+    private Long restaurantId;
+    private String phoneNumber;
 }

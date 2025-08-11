@@ -1,65 +1,85 @@
 package com.pragma.usuarios.application.handler;
 
-
 import com.pragma.usuarios.application.dto.CreateUserRequest;
 import com.pragma.usuarios.application.dto.CreateUserResponse;
+import com.pragma.usuarios.application.dto.UserByIdResponse;
 import com.pragma.usuarios.application.mapper.UserMapper;
+import com.pragma.usuarios.domain.api.IAuthServicePort;
 import com.pragma.usuarios.domain.api.IUserServicePort;
 import com.pragma.usuarios.domain.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 class UserHandlerTest {
+
     @Mock
     private IUserServicePort userServicePort;
 
     @Mock
     private UserMapper userMapper;
 
+    @Mock
+    private IAuthServicePort authServicePort;
+
+    @InjectMocks
     private UserHandler userHandler;
+
+    private CreateUserRequest createUserRequest;
+    private User user;
 
     @BeforeEach
     void setUp() {
-        userHandler = new UserHandler(userServicePort, userMapper);
+        MockitoAnnotations.openMocks(this);
+
+        createUserRequest = new CreateUserRequest();
+        createUserRequest.setName("Daniel");
+        createUserRequest.setLastName("Bravo");
+        createUserRequest.setEmail("test@test.com");
+        createUserRequest.setPassword("1234");
+
+        user = new User();
+        user.setId(1L);
+        user.setName("Daniel");
     }
 
     @Test
-    void saveOwner_shouldMapRequest_callService_andReturnResponse() {
+    void saveOwner_ShouldReturnCreateUserResponse() {
         // Arrange
-        CreateUserRequest request = new CreateUserRequest();
-        request.setEmail("owner@test.com");
+        CreateUserResponse expectedResponse = new CreateUserResponse();
+        expectedResponse.setName("Daniel");
 
-        User userDomain = new User();
-        userDomain.setEmail("owner@test.com");
-
-        User savedUser = new User();
-        savedUser.setId(1L);
-        savedUser.setEmail("owner@test.com");
-
-        CreateUserResponse response = new CreateUserResponse();
-
-        when(userMapper.toUser(request)).thenReturn(userDomain);
-        when(userServicePort.createOwner(eq(userDomain), any(User.class))).thenReturn(savedUser);
-        when(userMapper.toUserResponse(savedUser)).thenReturn(response);
+        when(userMapper.toUser(createUserRequest)).thenReturn(user);
+        when(userServicePort.createOwner(any(User.class))).thenReturn(user);
+        when(userMapper.toUserResponse(user)).thenReturn(expectedResponse);
 
         // Act
-        CreateUserResponse result = userHandler.saveOwner(request);
+        CreateUserResponse response = userHandler.saveOwner(createUserRequest);
 
         // Assert
-        assertNotNull(result);
+        assertEquals("Daniel", response.getName());
+    }
 
-        verify(userMapper).toUser(request);
-        verify(userServicePort).createOwner(eq(userDomain), any(User.class));
-        verify(userMapper).toUserResponse(savedUser);
+    @Test
+    void findById_ShouldReturnUserByIdResponse() {
+        // Arrange
+        when(userServicePort.findById(1L)).thenReturn(user);
+        when(authServicePort.getRoles(user)).thenReturn(List.of("OWNER"));
+
+        // Act
+        UserByIdResponse response = userHandler.findById(1L);
+
+        // Assert
+        assertEquals(1L, response.getId());
+        assertEquals("Daniel", response.getName());
+        assertEquals(List.of("OWNER"), response.getRoles());
     }
 }

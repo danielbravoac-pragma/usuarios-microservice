@@ -1,9 +1,10 @@
-package com.pragma.usuarios.application.usecase;
+package com.pragma.usuarios.domain.usecase;
 
 import com.pragma.usuarios.domain.model.Role;
 import com.pragma.usuarios.domain.model.User;
 import com.pragma.usuarios.domain.model.UserRole;
 import com.pragma.usuarios.domain.spi.IUserRolePersistencePort;
+import com.pragma.usuarios.domain.usecase.UserRoleUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,5 +43,16 @@ class UserRoleUseCaseTest {
 
         assertEquals(1L, userCaptor.getValue().getId());
         assertEquals(UserRole.OWNER, roleCaptor.getValue().getName());
+    }
+
+    @Test
+    void findByUser_shouldReturnListStringOfRoles(){
+        User user = new User();
+        user.setId(1L);
+
+        userRoleUseCase.findByUser(user);
+
+        verify(userRolePersistencePort,times(1)).findByUser(user);
+
     }
 }

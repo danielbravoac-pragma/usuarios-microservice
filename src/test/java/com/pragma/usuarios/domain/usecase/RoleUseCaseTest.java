@@ -1,9 +1,10 @@
-package com.pragma.usuarios.application.usecase;
+package com.pragma.usuarios.domain.usecase;
 
 
 import com.pragma.usuarios.domain.model.Role;
 import com.pragma.usuarios.domain.model.UserRole;
 import com.pragma.usuarios.domain.spi.IRolePersistencePort;
+import com.pragma.usuarios.domain.usecase.RoleUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
